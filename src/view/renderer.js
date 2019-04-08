@@ -754,8 +754,23 @@ export default class Renderer {
 		// Otherwise, FF may throw an error (https://github.com/ckeditor/ckeditor5/issues/721).
 		domRoot.focus();
 
-		domSelection.collapse( anchor.parent, anchor.offset );
-		domSelection.extend( focus.parent, focus.offset );
+		if ( domSelection.extend ) {
+			domSelection.collapse( anchor.parent, anchor.offset );
+			domSelection.extend( focus.parent, focus.offset );
+		} else {
+			const domRange = document.createRange();
+
+			if ( this.selection.anchor.isBefore( this.selection.focus ) ) {
+				domRange.setStart( anchor.parent, anchor.offset );
+				domRange.setEnd( focus.parent, focus.offset );
+			} else {
+				domRange.setStart( focus.parent, focus.offset );
+				domRange.setEnd( anchor.parent, anchor.offset );
+			}
+
+			domSelection.removeAllRanges();
+			domSelection.addRange( domRange );
+		}
 
 		// Firefox–specific hack (https://github.com/ckeditor/ckeditor5-engine/issues/1439).
 		if ( env.isGecko ) {

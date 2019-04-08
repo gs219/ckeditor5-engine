@@ -993,7 +993,7 @@ export default class DomConverter {
 		// This means that the text node starts/end with normal space instead of non-breaking space.
 		// This causes a problem because the normal space would be removed in `.replace` calls above. To prevent that,
 		// the inline filler is removed only after the data is initially processed (by the `.replace` above). See ckeditor5#692.
-		data = getDataWithoutFiller( new Text( data ) );
+		data = getDataWithoutFiller( document.createTextNode( data ) );
 
 		// At this point we should have removed all whitespaces from DOM text data.
 
@@ -1119,8 +1119,10 @@ export default class DomConverter {
 		const document = node.ownerDocument;
 		const topmostParent = getAncestors( node )[ 0 ];
 
-		const treeWalker = document.createTreeWalker( topmostParent, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT, {
-			acceptNode( node ) {
+		const treeWalker = document.createTreeWalker(
+			topmostParent,
+			NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT,
+			function acceptNode( node ) {
 				if ( isText( node ) ) {
 					return NodeFilter.FILTER_ACCEPT;
 				}
@@ -1130,8 +1132,8 @@ export default class DomConverter {
 				}
 
 				return NodeFilter.FILTER_SKIP;
-			}
-		} );
+			}, false
+		);
 
 		treeWalker.currentNode = node;
 
