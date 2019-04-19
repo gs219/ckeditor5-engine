@@ -156,9 +156,10 @@ export function needsPlaceholder( element ) {
 	// The element is empty only as long as it contains nothing but uiElements.
 	const isEmptyish = !Array.from( element.getChildren() )
 		.some( element => !element.is( 'uiElement' ) );
+	
 
 	// If the element is empty and the document is blurred.
-	if ( !doc.isFocused && isEmptyish ) {
+	if ( isEmptyish ) {
 		return true;
 	}
 
@@ -203,6 +204,10 @@ function updateDocumentPlaceholders( doc, writer ) {
 // @returns {Boolean} True if any changes were made to the view document.
 function updatePlaceholder( writer, element, config ) {
 	const { text, isDirectHost } = config;
+	// 修复在输入回车键之后placeholder未隐藏的问题
+	if(element.childCount > 1) {
+		hidePlaceholder( writer, element.getChild(0) );
+	}
 	const hostElement = isDirectHost ? element : getChildPlaceholderHostSubstitute( element );
 	let wasViewModified = false;
 
